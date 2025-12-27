@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台南三代同堂・輕旅行 App</title>
+    <style>
+        /* --- 視覺風格定義 --- */
+        :root {
+            --primary-blue: #2D6BFF;
+            --youtube-red: #FF0000;
+            --accent-blue: #EBF3FF;
+            --text-dark: #1F2A44;
+            --text-grey: #7A869A;
+            --bg-gradient: linear-gradient(135deg, #F0F4F8 0%, #E1E9F2 100%);
+            --card-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --section-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --time-tag-bg: #FEF3C7;
+            --time-tag-text: #92400E;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 20px 15px;
+            color: #333;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .section-card {
+            background: #fff;
+            border-radius: 30px;
+            box-shadow: var(--section-shadow);
+            padding: 25px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h2 { color: var(--text-dark); font-size: 24px; margin-bottom: 8px; line-height: 1.3; }
+        p { color: var(--text-grey); font-size: 14px; line-height: 1.6; margin-bottom: 15px; }
+        .subtitle { color: var(--text-grey); font-size: 14px; margin-bottom: 20px; display: block; }
+
+        /* --- 封面圖片樣式 --- */
+        .cover-img-container {
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(45, 107, 255, 0.2);
+            border: 4px solid #fff;
+            background-color: #f0f0f0;
+        }
+        .cover-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            background: #F8FAFC;
+            padding: 15px;
+            border-radius: 20px;
+        }
+        .stat-item { text-align: center; flex: 1; }
+        .stat-val { display: block; font-size: 16px; font-weight: bold; color: var(--primary-blue); }
+        .stat-lbl { font-size: 11px; color: var(--text-grey); }
+
+        details.trip-card {
+            background: #fff;
+            border-radius: 18px;
+            margin-bottom: 15px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid #F1F5F9;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        details.trip-card[open] {
+            box-shadow: 0 8px 20px rgba(45, 107, 255, 0.15);
+            border-color: var(--primary-blue);
+        }
+
+        summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 0;
+            position: relative;
+        }
+        summary::-webkit-details-marker { display: none; }
+
+        .card-preview {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+        }
+
+        /* --- 標題圖示 (Emoji) --- */
+        .card-icon-box {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background-color: #F0F7FF;
+            margin-right: 15px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+        }
+
+        .card-info { flex: 1; }
+        
+        .card-time-range { 
+            font-size: 12px; 
+            color: var(--time-tag-text); 
+            font-weight: bold; 
+            background: var(--time-tag-bg);
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        
+        .card-title { font-size: 16px; font-weight: bold; color: var(--text-dark); }
+        .card-arrow { font-size: 14px; color: #ccc; margin-left: 10px; transition: transform 0.3s; }
+        
+        details[open] .card-arrow { transform: rotate(180deg); }
+
+        .card-details {
+            padding: 0 20px 20px 20px;
+            border-top: 1px dashed #eee;
+            margin-top: 5px;
+            animation: slideDown 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tips-box {
+            background: #FFF8E1;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #856404;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        .tips-box ul { padding-left: 20px; margin: 0; }
+
+        /* --- 按鈕群組 --- */
+        .btn-group {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-map {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-blue);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(45, 107, 255, 0.2);
+        }
+
+        .btn-youtube {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 12px;
+            background-color: #fff;
+            color: var(--youtube-red);
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: 2px solid var(--youtube-red);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: background 0.2s;
+        }
+        .btn-youtube:active { background-color: #FFF0F0; }
+
+        /* --- 底部大照片樣式 --- */
+        .location-photo {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 4px solid #fff;
+            background-color: #eee;
+        }
+
+        .btn-start {
+            background-color: var(--text-dark);
+            color: white;
+            padding: 18px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 25px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            margin-top: 20px;
+            padding-bottom: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <div class="section-card">
+        <div class="section-header">
+            <span>Family Trip</span>
+            <span>2 Days</span>
+        </div>
+        
+        <div style="text-align: center;">
+            <div class="cover-img-container">
+                <img src="招牌家族.jpg" class="cover-img" alt="全家福"> 
+            </div>
+            
+            <h2>台南三代同堂<br>美食祈福之旅</h2>
+            <p>專為「長輩與小孩」設計的輕鬆行程。<br>少走路、吃好料，全家團聚。</p>
+        </div>
+
+        <div class="stat-row">
+            <div class="stat-item">
+                <span class="stat-val">2天</span>
+                <span class="stat-lbl">行程</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val">4人</span>
+                <span class="stat-lbl">成員</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val">09:30</span>
+                <span class="stat-lbl">出發</span>
+            </div>
+        </div>
+
+        <div class="btn-start" onclick="document.getElementById('day1').scrollIntoView({behavior: 'smooth'})">👇 開始旅程 Start</div>
+    </div>
+
+    <div class="section-card" id="day1">
+        <div class="section-header">
+            <span>Day 1</span>
+            <span>09:30 出發</span>
+        </div>
+        
+        <h2>Day 1 悠閒南下</h2>
+        <span class="subtitle">台北出發 ➝ 台中 ➝ 嘉義 ➝ 台南</span>
+
+         <details class="trip-card">
+            <summary class="card-preview">
+                <div class="card-icon-box">☕</div>
+                <div class="card-info">
+                    <span class="card-time-range">10:45 - 11:30</span>
+                    <div class="card-title">關西服務區</div>
+                </div>
+                <div class="card-arrow">▼</div>
+            </summary>
+            <div class="card-details">
+                <div class="tips-box">
+                    <ul>
+                        <li>尿尿 買葡萄芭樂紅豆餅</li>
+                        <li>阿公開一小時漉漉就吐了</li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <a href="https://www.google.com/maps/search/?api=1&query=關西服務區" class="btn-map" target="_blank">📍 Google 導航</a>
+                    <a href="https://www.youtube.com/results?search_query=關西服務區" class="btn-youtube" target="_blank">📺 景點介紹影片</a>
+                </div>
+                <img src="10.jpg" class="location-photo" alt="關西照片">
+            </div>
+        </details>
+        
+        
+        
+        <details class="trip-card">
+            <summary class="card-preview">
+                <div class="card-icon-box">☕</div>
+                <div class="card-info">
+                    <span class="card-time-range">12:40 - 14:30</span>
+                    <div class="card-title">清水服務區</div>
+                </div>
+                <div class="card-arrow">▼</div>
+            </summary>
+            <div class="card-details">
+                <div class="tips-box">
+                    <ul>
+                        <li>吃午餐</li>
+                        <li>3樓有景觀台，室內有大魚缸(電子螢幕？)</li>
+                        <li>把超貴150元冰弄到地板</li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <a href="https://www.google.com/maps/search/?api=1&query=清水服務區" class="btn-map" target="_blank">📍 Google 導航</a>
+                    <a href="https://www.youtube.com/results?search_query=清水服務區" class="btn-youtube" target="_blank">📺 景點介紹影片</a>
+                </div>
+                <img src="01.jpg" class="location-photo" alt="清水照片">
+                <img src="11.jpg" class="location-photo" alt="清水照片">
+            </div>
+        </details>
+        
+        
+        <details class="trip-card">
+            <summary class="card-preview">
+                <div class="card-icon-box">☕</div>
+                <div class="card-info">
+                    <span class="card-time-range">16:00  - 16:30</span>
+                    <div class="card-title">東山服務區</div>
+                </div>
+                <div class="card-arrow">▼</div>
+            </summary>
+            <div class="card-details">
+                <div class="tips-box">
+                    <ul>
+                        <li>下車尿尿</li>
+                        <li></li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <a href="https://www.google.com/maps/search/?api=1&query=東山服務區" class="btn-map" target="_blank">📍 Google 導航</a>
+                    <a href="https://www.youtube.com/results?search_query=東山服務區" class="btn-youtube" target="_blank">📺 景點介紹影片</a>
+                </div>
+                <img src="02.jpg" class="location-photo" alt="東山照片">
+            </div>
+        </details>
+        
+        <details class="trip-card" open> 
+            <summary class="card-preview">
+                <div class="card-icon-box">🙏</div>
+                <div class="card-info">
+                    <span class="card-time-range">17:00 - 18:00</span>
+                    <div class="card-title">台灣首廟天壇</div>
+                </div>
+                <div class="card-arrow">▼</div>
+            </summary>
+            <div class="card-details">
+                <div class="tips-box">建議停留：1小時。祈求全家平安。</div>
+                <div class="btn-group">
+                    <a href="https://www.google.com/maps/search/?api=1&query=台灣首廟天壇" class="btn-map" target="_blank">📍 Google 導航</a>
+                    <a href="https://www.youtube.com/results?search_query=台灣首廟天壇+拜拜" class="btn-youtube" target="_blank">📺 拜拜教學影片</a>
+                </div>
+                <img src="07.jpg" class="location-photo" alt="天壇照片">
+            </div>
+        </details>
+       
+
+        <details class="trip-card">
+            <summary class="card-preview">
+                <div class="card-icon-box">🏨</div>
+                <div class="card-info">
+                    <span class="card-time-range">16:00 抵達</span>
+                    <div class="card-title">府城商旅 Check-in</div>
+                </div>
+                <div class="card-arrow">▼</div>
+            </summary>
+            <div class="card-details">
+                <p>進房後建議全員補眠，17:20 再出門吃晚餐。</p>
+                <div class="tips-box">★ 請櫃檯安排不靠馬路的房間</div>
+                <div class="btn-group">
+                    <a href="https://www.google.com/maps/search/?api=1&query=台南府城商旅" class="btn-map" target="_blank">📍 Google 導航</a>
+                </div>
+                <img src="03.jpg" class="location-photo" alt="飯店照片">
+            </div>
+        </details>
+
+        <details class="trip-card">
+            <summary class="card-preview">
+                <div class="card-icon-box">🍜</div>
+                <div class="card-info">
+                    <span class="card-time-range">17:30 - 18:30</span>
+                    <div class="card-title">城邊真味鱔魚意麵</div>
+                </div>
+                <div class="card-arrow">▼</div>
+            </summary>
+            <div class="card-details">
+                <div class="tips-box">必點：乾炒鱔魚意麵、麻油腰花</div>
+                <div class="btn-group">
+                    <a href="https://www.google.com/maps/search/?api=1&query=城邊真味炒鱔魚專家" class="btn-map" target="_blank">📍 Google 導航</a>
+                    <a href="https://www.youtube.com/results?search_query=城邊真味鱔魚意麵" class="btn-youtube" target="_blank">📺 介紹影片</a>
+                </div>
+                <img src="04.jpg" class="location-photo" alt="鱔魚意麵照片">
+            </div>
+        </details>
+        
+        <div style="text-align: center; margin-top: 20px; color: #7A869A; font-size: 14px;">
+            😴 晚餐後回飯店休息，養足精神！
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <span>Day 2</span>
+            <span>08:00 早餐</span>
+        </div>
+
+        <h2>Day 2 祈福與返家</h2>
+        <span class="subtitle">08:00 早餐 ➝ 09:30 退房出發</span>
+
+        <details class="trip-card">
+            <summary class="card-preview">
+                <div class="card-icon-box">🥪</div>
+                <div class="card-info">
+                    <span class="card-time-range">08:00 - 09:00</span>
+                    <div class="card-title">在地人氣早點 (阿勝去買)</div>
+                </div>
+                <div class="card-arrow">▼</div>
+            </summary>
+            <div class="card-details">
+                <p>阿勝外帶回飯店，全家一起舒服吃。</p>
+                <div class="tips-box">
+                    <ul>
+                        <li><b>慶雲燒餅</b>：燒餅油條、豆漿</li>
+                        <li><b>立大早點</b>：傳統蛋餅、煎餃</li>
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <a href="https://www.google.com/maps/search/?api=1&query=慶雲燒餅豆漿烘培專賣店" class="btn-map" target="_blank">📍 導航：慶雲燒餅</a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=立大早點" class="btn-map" target="_blank">📍 導航：立大早點</a>
+                </div>
+                <img src="06.jpg" class="location-photo" alt="早餐照片">
+            </div>
+        </details>
+
+        
+
+        <details class="trip-card">
+            <summary class="card-preview">
+                <div class="card-icon-box">🥩</div>
+                <div class="card-info">
+                    <span class="card-time-range">11:30 - 13:00</span>
+                    <div class="card-title">文章牛肉湯 (新店)</div>
+                </div>
+                <div class="card-arrow">▼</div>
+            </summary>
+            <div class="card-details">
+                <div class="tips-box">安平路300號(有冷氣)。吃飽後直接北上！</div>
+                <div class="btn-group">
+                    <a href="https://www.google.com/maps/search/?api=1&query=文章牛肉湯安平總店" class="btn-map" target="_blank">📍 Google 導航</a>
+                    <a href="https://www.youtube.com/results?search_query=文章牛肉湯" class="btn-youtube" target="_blank">📺 美食介紹影片</a>
+                </div>
+                <img src="08.jpg" class="location-photo" alt="牛肉湯照片">
+            </div>
+        </details>
+
+        <details class="trip-card">
+            <summary class="card-preview">
+                <div class="card-icon-box">🏠</div>
+                <div class="card-info">
+                    <span class="card-time-range">14:10 抵達 (中停)</span>
+                    <div class="card-title">西螺服務區 (北返)</div>
+                </div>
+                <div class="card-arrow">▼</div>
+            </summary>
+            <div class="card-details">
+                <p>中途上廁所、買伴手禮。休息 20 分鐘後繼續北上。</p>
+                <div class="tips-box">
+                    預計 17:00 前抵達台北家裡。
+                </div>
+                <div class="btn-group">
+                    <a href="https://www.google.com/maps/search/?api=1&query=西螺服務區" class="btn-map" target="_blank">📍 Google 導航</a>
+                </div>
+                <img src="10.jpg" class="location-photo" alt="回家照片">
+            </div>
+        </details>
+    </div>
+
+    <div class="footer">
+        祝全家旅途愉快 ❤️ 行車平安
+    </div>
+
+</div>
+
+</body>
+</html>
