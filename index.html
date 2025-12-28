@@ -251,7 +251,61 @@
             margin-top: 20px;
             padding-bottom: 20px;
         }
+        /* --- 補上：相簿牆的 CSS 樣式 --- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 關鍵：設定為兩欄網格 */
+            gap: 10px; /* 照片之間的間距 */
+            margin-top: 15px;
+        }
+        .gallery-item {
+            width: 100%;
+            aspect-ratio: 1 / 1; /* 關鍵：強制裁切成正方形 */
+            object-fit: cover; /* 讓照片填滿方格且不變形 */
+            border-radius: 12px; /* 圓角看起來比較柔和 */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 淡淡的陰影 */
+            background-color: #eee; /* 預設灰色底，照片載入前不會一片白 */
+        }
+        /* --- 新增：點擊放大 (燈箱) 樣式 --- */
+        .lightbox-modal {
+            display: none; /* 預設隱藏 */
+            position: fixed;
+            z-index: 9999; /* 保證在最上層 */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9); /* 黑色半透明背景 */
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+        
+        .lightbox-content {
+            max-width: 95%;
+            max-height: 90%;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            object-fit: contain;
+        }
 
+        .close-hint {
+            position: absolute;
+            bottom: 30px;
+            color: #fff;
+            font-size: 14px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            pointer-events: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+    
     </style>
 </head>
 <body>
@@ -580,11 +634,78 @@
         
     </div>
 
+     <div class="section-card">
+        <div class="section-header">
+            <span>Memories</span>
+            <span>Gallery</span>
+        </div>
+        
+        <h2>📸 旅途回憶牆</h2>
+        <span class="subtitle">美好的瞬間都記錄在這裡 (共27張)</span>
+
+        <div class="gallery-grid">
+            <img src="30.jpg" class="gallery-item" loading="lazy" alt="照片1">
+            <img src="31.jpg" class="gallery-item" loading="lazy" alt="照片2">
+            <img src="32.jpg" class="gallery-item" loading="lazy" alt="照片3">
+            <img src="33.jpg" class="gallery-item" loading="lazy" alt="照片4">
+            <img src="34.jpg" class="gallery-item" loading="lazy" alt="照片5">
+            <img src="35.jpg" class="gallery-item" loading="lazy" alt="照片6">
+            <img src="36.jpg" class="gallery-item" loading="lazy" alt="照片7">
+            <img src="37.jpg" class="gallery-item" loading="lazy" alt="照片8">
+            <img src="38.jpg" class="gallery-item" loading="lazy" alt="照片9">
+            <img src="39.jpg" class="gallery-item" loading="lazy" alt="照片10">
+            <img src="40.jpg" class="gallery-item" loading="lazy" alt="照片11">
+            <img src="41.jpg" class="gallery-item" loading="lazy" alt="照片12">
+            <img src="42.jpg" class="gallery-item" loading="lazy" alt="照片13">
+            <img src="43.jpg" class="gallery-item" loading="lazy" alt="照片14">
+            <img src="44.jpg" class="gallery-item" loading="lazy" alt="照片15">
+            <img src="45.jpg" class="gallery-item" loading="lazy" alt="照片16">
+            <img src="46.jpg" class="gallery-item" loading="lazy" alt="照片17">
+            <img src="47.jpg" class="gallery-item" loading="lazy" alt="照片18">
+            <img src="48.jpg" class="gallery-item" loading="lazy" alt="照片19">
+            <img src="49.jpg" class="gallery-item" loading="lazy" alt="照片20">
+            <img src="50.jpg" class="gallery-item" loading="lazy" alt="照片21">
+            <img src="51.jpg" class="gallery-item" loading="lazy" alt="照片22">
+            <img src="52.jpg" class="gallery-item" loading="lazy" alt="照片23">
+            <img src="53.jpg" class="gallery-item" loading="lazy" alt="照片24">
+            <img src="54.jpg" class="gallery-item" loading="lazy" alt="照片25">
+            <img src="55.jpg" class="gallery-item" loading="lazy" alt="照片26">
+            <img src="56.jpg" class="gallery-item" loading="lazy" alt="照片27">
+        </div>
+    </div>
+   
+    
     <div class="footer">
         祝全家旅途愉快 ❤️ 行車平安
     </div>
 
 </div>
+<div id="myLightbox" class="lightbox-modal" onclick="closeLightbox()">
+    <img class="lightbox-content" id="lightboxImg">
+    <div class="close-hint">點擊任意處關閉</div>
+</div>
+
+<script>
+    // 取得放大視窗元素
+    const lightbox = document.getElementById('myLightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+
+    // 設定所有「回憶牆」的照片都可以點擊
+    // 注意：這裡只抓 .gallery-item (回憶牆的照片)
+    // 如果連上面的景點照片也要放大，可以改成 document.querySelectorAll('img')
+    document.querySelectorAll('.gallery-item').forEach(image => {
+        image.style.cursor = 'zoom-in'; // 滑鼠變成放大鏡圖示
+        image.addEventListener('click', () => {
+            lightbox.style.display = 'flex'; // 顯示視窗
+            lightboxImg.src = image.src;     // 把大圖換成點擊的那張
+        });
+    });
+
+    // 關閉視窗的功能
+    function closeLightbox() {
+        lightbox.style.display = 'none';
+    }
+</script>
 
 </body>
 </html>
